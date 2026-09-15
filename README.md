@@ -13,7 +13,13 @@ proiect gratuit **Supabase**. Se pune pe **GitHub** și se face deploy pe
 - Cine are **6 de inimă** deschide jocul, obligatoriu cu acea carte.
 - Se joacă în ordinea locurilor. La rândul tău, fie pui o carte
   **egală sau mai mare** decât ultima de pe masă, fie apeși
-  **„Iau cărțile"** (iei tot ce e adunat pe masă).
+  **„Iau cărțile"** — apoi **alegi tu câte cărți iei** (minim 4, sau
+  tot ce e pe masă dacă sunt mai puține de 4), din **ultimele puse**;
+  restul rămân scoase din joc.
+- **Careu (4 cărți identice)**: dacă ai la tine toate cele 4 cărți de
+  același fel (ex: toți cei 4 popi), poți apăsa **„🃏 Scoate careul"**
+  oricând, ca să le scoți definitiv din joc — nu mai trebuie să le joci
+  pe masă. Dacă asta îți golește mâna, ieși din rundă normal.
 - Oricând poți apăsa **„🏁 Am terminat"**:
   - dacă chiar nu mai ai cărți, ieși din joc normal;
   - dacă minți (încă ai cărți), te retragi din rândul de joc, dar
@@ -85,10 +91,21 @@ să atingi nimic altceva în afară de `config.js`, la pasul 5.
 
    Ar trebui să vezi „Success. No rows returned" — înseamnă că tabela
    `rooms` a fost creată corect.
-4. Activează sincronizarea live:
-   - Meniul din stânga → **Database** → **Replication**
-   - La secțiunea „Source" găsești lista de tabele → găsește `rooms`
-     și pune switch-ul pe **ON** (activat).
+4. Activează sincronizarea live pentru tabela `rooms` — cel mai sigur
+   mod, care funcționează indiferent cum arată interfața Supabase în
+   momentul în care citești asta, e să rulezi în **SQL Editor** (același
+   loc ca la pasul 3) încă o comandă:
+
+   ```sql
+   alter publication supabase_realtime add table rooms;
+   ```
+
+   Dacă preferi din interfață: meniul din stânga → **Database** →
+   **Publications** → sub `supabase_realtime` → activează switch-ul
+   pentru tabela `rooms`. (Atenție: NU e pagina „Replication" — aceea
+   e pentru altceva, export de date către destinații externe. Dacă nu
+   găsești „Publications" în meniu, comanda SQL de mai sus face exact
+   același lucru și e cea mai sigură variantă.)
 5. Ia cheile de conectare:
    - Meniul din stânga → **Project Settings** (iconița de rotiță, jos)
      → **API**

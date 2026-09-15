@@ -440,11 +440,17 @@ function verifyPlayerLogic(state, challengerId, accusedId) {
   const accused = state.players.find(p => p.id === accusedId);
   if (!challenger || !accused || challenger.id === accused.id) return null;
   if (challenger.out) { showToast("Ai terminat deja, nu mai poți verifica."); return null; }
+  if (!accused.claimedFinished && !accused.out) {
+    showToast("Poți verifica doar pe cineva care a zis că a terminat (sau chiar a terminat).");
+    return null;
+  }
 
   const reallyHasCards = accused.hand.length > 0;
 
   if (reallyHasCards) {
-    if (accused.claimedFinished) accused.claimedFinished = false;
+    // se rezolvă o singură dată: imediat scoatem "claimedFinished", deci
+    // nimeni nu mai poate aplica din nou amenda pentru aceeași declarație
+    accused.claimedFinished = false;
     const { given } = grabPenaltyCards(state, accused, PENALTY_COUNT);
     state.chat.push({ author: "Sistem", text: `🚨 ${challenger.name} l-a demascat pe ${accused.name} — încă avea cărți! Primește ${given} cărți penalizare.`, ts: nowIso(), system: true });
   } else {
@@ -657,7 +663,7 @@ function renderGame(state) {
     for (let i = 0; i < Math.min(p.hand.length, 8); i++) fan.appendChild(el("div", "mini-cardback"));
     seat.appendChild(fan);
 
-    if (me && !me.out) {
+    if (me && !me.out && (p.claimedFinished || p.out)) {
       const verifyBtn = el("button", "verify-btn", "🔍 Verifică");
       verifyBtn.addEventListener("click", () => verifyPlayer(p.id));
       seat.appendChild(verifyBtn);

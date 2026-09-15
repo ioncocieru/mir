@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mir — joc de cărți online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================= ECRAN: INTRARE / LOBBY ================= -->
+<section id="screen-lobby" class="screen">
+  <div class="lobby-bg" aria-hidden="true">
+    <span class="bg-suit s1">♠</span>
+    <span class="bg-suit s2">♥</span>
+    <span class="bg-suit s3">♦</span>
+    <span class="bg-suit s4">♣</span>
+    <span class="bg-suit s5">♠</span>
+    <span class="bg-suit s6">♥</span>
+    <span class="bg-suit s7">♦</span>
+    <span class="bg-suit s8">♣</span>
+  </div>
+
+  <div class="lobby-card">
+    <div id="deal-fan" class="deal-fan"></div>
+    <h1 class="brand">Mir<span class="brand-dot">•</span></h1>
+    <p class="tagline">Jocul de cărți cu 6, minciuni și mese pline de tensiune.</p>
+
+    <label class="field">
+      <span>Numele tău</span>
+      <input id="input-name" type="text" maxlength="18" placeholder="ex: Radu" autocomplete="off">
+    </label>
+
+    <div class="field">
+      <span>Avatarul tău</span>
+      <div id="avatar-picker" class="avatar-picker"></div>
+    </div>
+
+    <div class="avatar-preview-row">
+      <div id="avatar-preview" class="avatar-circle avatar-lg"></div>
+      <span id="avatar-preview-name" class="avatar-preview-name">Tu</span>
+    </div>
+
+    <div class="lobby-actions">
+      <button id="btn-create-room" class="btn btn-primary">Creează o cameră</button>
+
+      <div class="divider"><span>sau</span></div>
+
+      <label class="field">
+        <span>Cod cameră</span>
+        <input id="input-room-code" type="text" maxlength="9" placeholder="ex: MIR-4821" autocomplete="off">
+      </label>
+      <button id="btn-join-room" class="btn btn-secondary">Intră în cameră</button>
+    </div>
+
+    <p id="lobby-error" class="error-text"></p>
+  </div>
+</section>
+
+<!-- ================= ECRAN: SALA DE AȘTEPTARE ================= -->
+<section id="screen-waiting" class="screen hidden">
+  <div class="lobby-card">
+    <h2>Sala de așteptare</h2>
+    <p class="tagline">Trimite codul ăsta prietenilor tăi (2–5 jucători):</p>
+    <div class="room-code-display" id="waiting-room-code">MIR-0000</div>
+    <button id="btn-copy-code" class="btn btn-ghost">Copiază codul</button>
+
+    <h3 class="players-title">Jucători în cameră</h3>
+    <ul id="waiting-players" class="players-list"></ul>
+
+    <button id="btn-start-game" class="btn btn-primary" disabled>Începe jocul</button>
+    <p class="hint-text">Doar cel care a creat camera poate începe jocul, cu minim 2 jucători.</p>
+  </div>
+</section>
+
+<!-- ================= ECRAN: JOC ================= -->
+<section id="screen-game" class="screen hidden">
+  <header class="game-topbar">
+    <div class="topbar-title">
+      <span class="brand-small">Mir</span>
+      <span class="room-pill" id="game-room-code">MIR-0000</span>
+    </div>
+    <div id="score-row" class="score-row"></div>
+    <div class="turn-indicator" id="turn-indicator">—</div>
+  </header>
+
+  <main class="table-wrap">
+    <div class="table-oval">
+      <div id="seats-layer" class="seats-layer"></div>
+
+      <div class="table-center">
+        <div class="talon-stack" id="talon-stack">
+          <div class="card-back talon-card"></div>
+          <span class="talon-count" id="talon-count">0</span>
+          <span class="talon-label">rezervă</span>
+        </div>
+        <div id="pile-cards" class="pile-cards"></div>
+        <div id="pile-empty-hint" class="pile-empty-hint">Masă goală</div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button id="btn-take-pile" class="btn btn-danger hidden">Iau cărțile</button>
+      <div id="take-selector" class="take-selector hidden">
+        <span class="take-selector-label">Iau ultimele</span>
+        <button id="btn-take-minus" type="button" class="stepper-btn">−</button>
+        <span id="take-count-display" class="take-count-display">4</span>
+        <button id="btn-take-plus" type="button" class="stepper-btn">+</button>
+        <span class="take-selector-label">cărți</span>
+        <button id="btn-take-confirm" class="btn btn-primary btn-small">Ia-le</button>
+        <button id="btn-take-cancel" class="btn btn-ghost btn-small">Anulează</button>
+      </div>
+      <button id="btn-declare-finished" class="btn btn-outline hidden">🏁 Am terminat</button>
+      <button id="btn-remove-quad" class="btn btn-warning hidden">🃏 Scoate careul</button>
+      <div id="my-turn-hint" class="my-turn-hint hidden"></div>
+    </div>
+
+    <div class="hand-dock">
+      <div id="my-hand" class="my-hand"></div>
+    </div>
+
+    <div class="corner-icons corner-left">
+      <button id="btn-settings" class="icon-btn" title="Setări">⚙️</button>
+    </div>
+    <div class="corner-icons corner-right">
+      <button id="btn-quick-emoji" class="icon-btn" title="Reacție rapidă">🙂</button>
+      <button id="btn-toggle-chat" class="icon-btn" title="Chat">💬</button>
+    </div>
+  </main>
+
+  <!-- Chat lateral -->
+  <aside id="chat-panel" class="chat-panel hidden">
+    <div class="chat-header">
+      <span>Chat</span>
+      <button id="btn-close-chat" class="icon-btn">✕</button>
+    </div>
+    <div id="chat-log" class="chat-log"></div>
+    <div class="emoji-row" id="emoji-row"></div>
+    <form id="chat-form" class="chat-form">
+      <input id="chat-input" type="text" maxlength="200" placeholder="Scrie un mesaj..." autocomplete="off">
+      <button type="submit" class="btn btn-primary btn-small">Trimite</button>
+    </form>
+  </aside>
+
+  <!-- Meniu setări -->
+  <div id="settings-modal" class="modal-backdrop hidden">
+    <div class="modal-box">
+      <h3>Regulile jocului Mir</h3>
+      <ul class="rules-list">
+        <li>Pachetul întreg (36 cărți) se împarte de la început — nu se mai trage din pachet.</li>
+        <li>Cine are 6 de inimă deschide prima rundă.</li>
+        <li>La rândul tău: pui o carte egală sau mai mare, ori iei tot ce e pe masă.</li>
+        <li>Poți apăsa „Am terminat" oricând ca să te retragi din tur — dar dacă minți și încă ai cărți, oricine te poate demasca apăsând 🔍 pe avatarul tău.</li>
+        <li>Dacă minciuna e adevărată: primești 6 cărți penalizare. Dacă acuzația e falsă: acuzatorul primește el penalizarea.</li>
+        <li>Ultimul rămas cu cărți în mână pierde.</li>
+      </ul>
+      <button id="btn-leave-room" class="btn btn-danger">Ieși din cameră</button>
+      <button id="btn-close-settings" class="btn btn-ghost">Închide</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ECRAN: FINAL JOC ================= -->
+<section id="screen-end" class="screen hidden">
+  <div class="lobby-card">
+    <h2 id="end-title">Runda s-a terminat</h2>
+    <ol id="end-results" class="results-list"></ol>
+    <p id="eliminated-note" class="eliminated-note hidden"></p>
+    <p id="countdown-note" class="countdown-note hidden"></p>
+    <button id="btn-play-again" class="btn btn-primary hidden">Joacă din nou acum</button>
+    <button id="btn-back-lobby" class="btn btn-ghost">Ieși din cameră</button>
+  </div>
+</section>
+
+<div id="toast" class="toast hidden"></div>
+<div id="reaction-layer" class="reaction-layer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

@@ -37,7 +37,103 @@ h1,h2,h3{
 
 .hidden{display:none !important;}
 
-/* ---------- Lobby ---------- */
+/* ---------- Lobby playful flair ---------- */
+.screen{ position:relative; }
+.lobby-bg{
+  position:absolute;
+  inset:0;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:0;
+}
+.bg-suit{
+  position:absolute;
+  font-size: 3.4rem;
+  color: rgba(216,164,75,.16);
+  animation: floatSuit 14s ease-in-out infinite;
+}
+.bg-suit.s1{ left:6%; top:12%; animation-delay:0s; }
+.bg-suit.s2{ left:85%; top:18%; animation-delay:1.5s; color: rgba(180,41,60,.16); }
+.bg-suit.s3{ left:12%; top:78%; animation-delay:3s; color: rgba(180,41,60,.16); }
+.bg-suit.s4{ left:88%; top:74%; animation-delay:4.5s; }
+.bg-suit.s5{ left:48%; top:6%; animation-delay:2s; font-size:2.4rem; }
+.bg-suit.s6{ left:50%; top:90%; animation-delay:5s; font-size:2.4rem; color: rgba(180,41,60,.14); }
+.bg-suit.s7{ left:20%; top:45%; animation-delay:6s; font-size:2rem; color: rgba(180,41,60,.12); }
+.bg-suit.s8{ left:78%; top:46%; animation-delay:1s; font-size:2rem; }
+@keyframes floatSuit{
+  0%, 100%{ transform: translateY(0) rotate(-6deg); }
+  50%{ transform: translateY(-22px) rotate(6deg); }
+}
+
+.lobby-card{ position:relative; z-index:1; overflow:visible; }
+
+.deal-fan{
+  display:flex;
+  justify-content:center;
+  height:64px;
+  margin-bottom: 4px;
+}
+.deal-fan .playing-card{
+  position:relative;
+  width:54px;
+  height:76px;
+  opacity:0;
+  animation: dealIn .55s ease forwards;
+}
+.deal-fan .playing-card:nth-child(1){ transform: rotate(-16deg) translateX(14px); animation-delay:.05s; }
+.deal-fan .playing-card:nth-child(2){ transform: translateY(-8px); animation-delay:.2s; z-index:2; }
+.deal-fan .playing-card:nth-child(3){ transform: rotate(16deg) translateX(-14px); animation-delay:.35s; }
+@keyframes dealIn{
+  from{ opacity:0; transform: translateY(-40px) rotate(0deg) scale(.7); }
+  to{ opacity:1; }
+}
+
+.brand{
+  background: linear-gradient(100deg, var(--wood) 30%, var(--red-suit) 50%, var(--wood) 70%);
+  background-size: 220% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 5s linear infinite;
+}
+@keyframes shine{
+  0%{ background-position: 0% center; }
+  100%{ background-position: -220% center; }
+}
+
+/* ---------- Take-cards selector ---------- */
+.take-selector{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(216,164,75,.4);
+  border-radius: 30px;
+  padding: 6px 10px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.take-selector-label{ font-size:.78rem; color: var(--cream); opacity:.85; }
+.stepper-btn{
+  width:30px; height:30px;
+  border-radius:50%;
+  border:none;
+  background: var(--brass);
+  color: var(--ink);
+  font-weight:800;
+  font-size:1.1rem;
+  cursor:pointer;
+  line-height:1;
+}
+.stepper-btn:disabled{ opacity:.4; cursor:not-allowed; }
+.take-count-display{
+  font-family:'Fraunces', serif;
+  font-weight:700;
+  font-size:1.2rem;
+  color: var(--brass-bright);
+  min-width:24px;
+  text-align:center;
+}
 .screen{
   min-height:100vh;
   display:flex;
@@ -490,9 +586,17 @@ h1,h2,h3{
   transition: transform .15s ease, box-shadow .15s ease;
 }
 .playing-card.suit-red{ color: var(--red-suit); }
-.playing-card .rank-top{ font-size:.9rem; line-height:1; }
-.playing-card .suit-symbol{ font-size:1.4rem; text-align:center; line-height:1; }
-.playing-card .rank-bottom{ font-size:.9rem; line-height:1; align-self:flex-end; transform: rotate(180deg); }
+.playing-card .rank-top{ font-size:.9rem; line-height:1; display:flex; align-items:center; gap:2px; }
+.playing-card .rank-bottom{ font-size:.9rem; line-height:1; align-self:flex-end; transform: rotate(180deg); display:flex; align-items:center; gap:2px; }
+.playing-card .mini-suit{ font-size:.65em; }
+
+.playing-card .face-art{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.playing-card .face-art svg{ width:70%; height:auto; }
 
 .pile-cards .playing-card{ margin-left:-26px; }
 .pile-cards .playing-card:first-child{ margin-left:0; }

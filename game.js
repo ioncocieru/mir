@@ -32,6 +32,8 @@ const MAX_STRIKES = 3;
 const AUTO_RESTART_SECONDS = 10;
 let autoRestartTimer = null;
 let autoRestartArmedForEndedAt = null;
+let takeSelectorOpen = false;
+let takeSelectorCount = 4;
 
 let myId = sessionStorage.getItem("mir_player_id");
 if (!myId) {
@@ -186,6 +188,7 @@ $("#btn-create-room").addEventListener("click", async () => {
     order: [],
     talon: [],
     pile: [],
+    discard: [],
     turnIndex: 0,
     mustOpenWithSixHearts: true,
     chat: [{ author: "Sistem", text: `${name} a creat camera.`, ts: nowIso(), system: true }],
@@ -274,6 +277,7 @@ function startGameLogic(state) {
   state.order = order;
   state.talon = talon;
   state.pile = [];
+  state.discard = [];
   state.turnIndex = starterIdx;
   state.mustOpenWithSixHearts = true;
   state.loserId = null;
@@ -387,15 +391,29 @@ function playCardLogic(state, playerId, cardIdToPlay) {
   return state;
 }
 
-function takePileLogic(state, playerId) {
+function takePileLogic(state, playerId, requestedCount) {
   const player = state.players.find(p => p.id === playerId);
   if (!player || player.out || player.claimedFinished) return null;
   if (state.order[state.turnIndex] !== playerId) { showToast("Nu e rândul tău."); return null; }
   if (state.pile.length === 0) { showToast("Masa e goală — trebuie să joci o carte."); return null; }
 
-  player.hand.push(...state.pile);
+  const minTake = Math.min(4, state.pile.length);
+  const maxTake = state.pile.length;
+  let count = Math.round(requestedCount);
+  if (isNaN(count)) count = minTake;
+  count = Math.max(minTake, Math.min(maxTake, count));
+
+  const taken = state.pile.slice(state.pile.length - count); // ultimele `count` cărți puse
+  const leftBehind = state.pile.slice(0, state.pile.length - count);
+
+  player.hand.push(...taken);
+  if (leftBehind.length > 0) {
+    state.discard = (state.discard || []).concat(leftBehind);
+  }
   state.pile = [];
-  state.chat.push({ author: "Sistem", text: `${player.name} ia toate cărțile de pe masă.`, ts: nowIso(), system: true });
+
+  const extra = leftBehind.length > 0 ? ` (restul de ${leftBehind.length} au fost scoase din joc)` : "";
+  state.chat.push({ author: "Sistem", text: `${player.name} ia ultimele ${count} cărți de pe masă${extra}.`, ts: nowIso(), system: true });
 
   state.turnIndex = nextActiveIndex(state, state.turnIndex);
   return state;
@@ -437,6 +455,30 @@ function verifyPlayerLogic(state, challengerId, accusedId) {
   return state;
 }
 
+function findFourOfAKindRanks(hand) {
+  const found = [];
+  for (const r of RANKS) {
+    const count = hand.filter(c => c.rank === r).length;
+    if (count === 4) found.push(r);
+  }
+  return found;
+}
+
+function removeFourOfAKindLogic(state, playerId, rank) {
+  const player = state.players.find(p => p.id === playerId);
+  if (!player || player.out) return null;
+  const matching = player.hand.filter(c => c.rank === rank);
+  if (matching.length !== 4) { showToast("Nu ai toate cele 4 cărți de acest fel."); return null; }
+
+  player.hand = player.hand.filter(c => c.rank !== rank);
+  state.discard = (state.discard || []).concat(matching);
+  state.chat.push({ author: "Sistem", text: `🃏 ${player.name} a scos careul de ${RANK_LABEL[rank]} din joc!`, ts: nowIso(), system: true });
+
+  if (player.hand.length === 0 && !player.claimedFinished) markPlayerOut(state, player);
+  checkEndCondition(state);
+  return state;
+}
+
 function sendChatLogic(state, authorId, text) {
   const player = state.players.find(p => p.id === authorId);
   state.chat.push({ author: player ? player.name : "?", text, ts: nowIso(), system: false });
@@ -454,8 +496,41 @@ function playAgainLogic(state) {
 // ACȚIUNI UI
 // =====================================================================
 async function playCard(cid) { await updateRoomState((state) => playCardLogic(state, myId, cid)); }
-$("#btn-take-pile").addEventListener("click", async () => { await updateRoomState((state) => takePileLogic(state, myId)); });
+
+$("#btn-take-pile").addEventListener("click", () => {
+  const pileLen = (latestState && latestState.pile) ? latestState.pile.length : 4;
+  takeSelectorCount = Math.min(4, pileLen);
+  takeSelectorOpen = true;
+  render(latestState);
+});
+$("#btn-take-cancel").addEventListener("click", () => {
+  takeSelectorOpen = false;
+  render(latestState);
+});
+$("#btn-take-minus").addEventListener("click", () => {
+  const pileLen = (latestState && latestState.pile) ? latestState.pile.length : 4;
+  const minTake = Math.min(4, pileLen);
+  takeSelectorCount = Math.max(minTake, takeSelectorCount - 1);
+  render(latestState);
+});
+$("#btn-take-plus").addEventListener("click", () => {
+  const pileLen = (latestState && latestState.pile) ? latestState.pile.length : 4;
+  takeSelectorCount = Math.min(pileLen, takeSelectorCount + 1);
+  render(latestState);
+});
+$("#btn-take-confirm").addEventListener("click", async () => {
+  const count = takeSelectorCount;
+  takeSelectorOpen = false;
+  await updateRoomState((state) => takePileLogic(state, myId, count));
+});
 $("#btn-declare-finished").addEventListener("click", async () => { await updateRoomState((state) => declareFinishedLogic(state, myId)); });
+$("#btn-remove-quad").addEventListener("click", async () => {
+  const me = latestState && latestState.players.find(p => p.id === myId);
+  if (!me) return;
+  const ranks = findFourOfAKindRanks(me.hand);
+  if (!ranks.length) return;
+  await updateRoomState((state) => removeFourOfAKindLogic(state, myId, ranks[0]));
+});
 async function verifyPlayer(accusedId) { await updateRoomState((state) => verifyPlayerLogic(state, myId, accusedId)); }
 
 $("#btn-back-lobby").addEventListener("click", () => location.reload());
@@ -617,8 +692,26 @@ function renderGame(state) {
   }
 
   // butoane acțiune
-  $("#btn-take-pile").classList.toggle("hidden", !(isMyTurn && state.pile.length > 0 && !state.mustOpenWithSixHearts));
+  const canTake = isMyTurn && state.pile.length > 0 && !state.mustOpenWithSixHearts;
+  if (!canTake) takeSelectorOpen = false;
+
+  $("#btn-take-pile").classList.toggle("hidden", !canTake || takeSelectorOpen);
+  const selectorEl = $("#take-selector");
+  selectorEl.classList.toggle("hidden", !(canTake && takeSelectorOpen));
+  if (canTake && takeSelectorOpen) {
+    const minTake = Math.min(4, state.pile.length);
+    const maxTake = state.pile.length;
+    takeSelectorCount = Math.max(minTake, Math.min(maxTake, takeSelectorCount));
+    $("#take-count-display").textContent = takeSelectorCount;
+    $("#btn-take-minus").disabled = takeSelectorCount <= minTake;
+    $("#btn-take-plus").disabled = takeSelectorCount >= maxTake;
+  }
   $("#btn-declare-finished").classList.toggle("hidden", !(me && !me.out && !me.claimedFinished));
+
+  const quadRanks = me && !me.out ? findFourOfAKindRanks(me.hand) : [];
+  const quadBtn = $("#btn-remove-quad");
+  quadBtn.classList.toggle("hidden", quadRanks.length === 0);
+  if (quadRanks.length) quadBtn.textContent = `🃏 Scoate careul de ${RANK_LABEL[quadRanks[0]]}`;
 
   const hint = $("#my-turn-hint");
   if (isMyTurn) {
@@ -632,10 +725,34 @@ function renderGame(state) {
   checkFloatingReactions(state);
 }
 
+function faceArtSVG(rank) {
+  if (rank === 11) { // Valet
+    return `<svg viewBox="0 0 40 56" fill="currentColor"><polygon points="20,2 27,11 13,11"/><circle cx="20" cy="17" r="7"/><path d="M9,42 Q20,26 31,42 L31,50 Q20,55 9,50 Z"/></svg>`;
+  }
+  if (rank === 12) { // Dama
+    return `<svg viewBox="0 0 40 56" fill="currentColor"><polygon points="9,11 13,2 17,11 20,3 23,11 27,2 31,11 31,14 9,14"/><circle cx="20" cy="20" r="7"/><path d="M8,44 Q20,28 32,44 L32,51 Q20,56 8,51 Z"/></svg>`;
+  }
+  if (rank === 13) { // Carol / Rege
+    return `<svg viewBox="0 0 40 56" fill="currentColor"><polygon points="8,13 12,3 17,11 20,2 23,11 28,3 32,13 32,16 8,16"/><circle cx="20" cy="7" r="2.3"/><circle cx="20" cy="22" r="7.5"/><path d="M7,46 Q20,29 33,46 L33,52 Q20,57 7,52 Z"/></svg>`;
+  }
+  if (rank === 14) { // As
+    return `<svg viewBox="0 0 40 56" fill="currentColor"><polygon points="20,2 24,16 38,16 27,25 31,40 20,31 9,40 13,25 2,16 16,16"/></svg>`;
+  }
+  return "";
+}
+
 function renderCardEl(card, disabled) {
   const meta = suitMeta(card.suit);
   const cardEl = el("div", "playing-card" + (meta.red ? " suit-red" : "") + (disabled ? " card-disabled" : ""));
-  cardEl.innerHTML = `<div class="rank-top">${RANK_LABEL[card.rank]}</div><div class="suit-symbol">${meta.symbol}</div><div class="rank-bottom">${RANK_LABEL[card.rank]}</div>`;
+  const isFace = card.rank >= 11;
+  const middle = isFace
+    ? `<div class="face-art">${faceArtSVG(card.rank)}</div>`
+    : `<div class="suit-symbol">${meta.symbol}</div>`;
+  cardEl.innerHTML = `
+    <div class="rank-top">${RANK_LABEL[card.rank]}<span class="mini-suit">${meta.symbol}</span></div>
+    ${middle}
+    <div class="rank-bottom">${RANK_LABEL[card.rank]}<span class="mini-suit">${meta.symbol}</span></div>
+  `;
   return cardEl;
 }
 

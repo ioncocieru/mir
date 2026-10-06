@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ro"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Test: Modernismul</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4efe6;--fg:#1c1b1a;--card:#fffaf0;--ac:#c8452d;--ok:#2f7d4f;--no:#b3261e;--mu:#777}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17161a;--fg:#f1ece2;--card:#222027;--ac:#ef7a5f;--ok:#58b57c;--no:#ef6b62;--mu:#9a96a0}}
+:root[data-theme="dark"]{--bg:#17161a;--fg:#f1ece2;--card:#222027;--ac:#ef7a5f;--ok:#58b57c;--no:#ef6b62;--mu:#9a96a0}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font-family:Georgia,'Times New Roman',serif;line-height:1.5}
+main{max-width:640px;margin:0 auto;padding:24px 18px 48px}
+h1{font-size:2rem;margin:.2em 0}.k{letter-spacing:.2em;font:600 .75rem system-ui,sans-serif;color:var(--ac);text-transform:uppercase}
+.bar{height:6px;background:var(--card);border-radius:3px;margin:16px 0}.bar i{display:block;height:100%;background:var(--ac);border-radius:3px;transition:width .3s}
+.q{font-size:1.25rem;margin:10px 0 16px}
+button.o{display:block;width:100%;text-align:left;margin:8px 0;padding:14px 16px;font:1rem system-ui,sans-serif;color:var(--fg);background:var(--card);border:2px solid transparent;border-radius:10px;cursor:pointer}
+button.o:hover:not(:disabled){border-color:var(--ac)}
+button.o.ok{border-color:var(--ok)}button.o.no{border-color:var(--no)}
+.ex{font:.95rem system-ui,sans-serif;color:var(--mu);margin:12px 0}
+.go{background:var(--ac);color:#fff;border:0;padding:12px 24px;border-radius:10px;font:600 1rem system-ui,sans-serif;cursor:pointer}
+.big{font-size:4rem;color:var(--ac);margin:0}
+</style></head><body><main id="app"></main>
+<script>
+const Q=[
+["Care este ideea centrală a modernismului european?","Ruptura de tradiție și căutarea unor forme noi de expresie",["Întoarcerea la valorile satului patriarhal","Imitarea fidelă a realității","Ruptura de tradiție și căutarea unor forme noi de expresie","Respectarea strictă a regulilor clasice"],"Modernismul respinge canoanele vechi și experimentează."],
+["Ce eveniment a adâncit criza valorilor la începutul secolului XX?","Primul Război Mondial",["Primul Război Mondial","Revoluția de la 1848","Unirea Principatelor","Războiul de Independență"],"Războiul a zdruncinat încrederea în rațiune și progres."],
+["Cine a formulat teoria sincronismului în cultura română?","Eugen Lovinescu",["Titu Maiorescu","Eugen Lovinescu","George Călinescu","Nicolae Iorga"],"Lovinescu, în cenaclul și revista „Sburătorul”, a susținut aliniera literaturii române la Occident."],
+["Care dintre aceștia este reprezentant al romanului subiectiv, de analiză psihologică?","Camil Petrescu",["Liviu Rebreanu","Ion Creangă","Camil Petrescu","Mihail Sadoveanu"],"Camil Petrescu: autenticitate, luciditate, relativitatea adevărului."],
+["Care este un procedeu modernist în proză?","Fluxul conștiinței",["Fluxul conștiinței","Narațiunea omniscientă obiectivă","Morala de la final","Descrierea de tip realist-balzacian"],"Joyce și Woolf redau gândurile personajului în curgerea lor nemijlocită."],
+["Ce înseamnă „poezia pură” sau ermetică?","Poezie densă, intelectualizată, cu sens greu de descifrat",["Poezie simplă, pentru popor","Poezie dens-simbolică, intelectualizată, cu sens greu de descifrat","Poezie exclusiv patriotică","Poezie umoristică"],"Exemple: Ion Barbu (Joc secund), Blaga într-o parte a operei."],
+["Care dintre următorii este un motiv frecvent în literatura modernistă?","Oglinda",["Hanul","Oglinda","Câmpia","Hora"],"Oglinda, masca, labirintul sugerează dedublarea și criza identității."],
+["Cine a scris romanul „În căutarea timpului pierdut”?","Marcel Proust",["James Joyce","Franz Kafka","Marcel Proust","Thomas Mann"],"Proust a impus memoria involuntară."],
+["Care dintre aceste opere este modernistă în literatura română?","„Ultima noapte de dragoste, întâia noapte de război”",["„Ion”","„Moromeții”","„Ultima noapte de dragoste, întâia noapte de război”","„Amintiri din copilărie”"],"Roman modern: introspecție, analiză, relativizarea adevărului."],
+["Ce atitudine față de lume exprimă adesea opera modernistă?","Neliniște, alienare, criză a identității",["Optimism naiv față de progres","Neliniște, alienare, criză a identității","Idealizarea trecutului","Indiferență față de artă"],"Omul modern se simte străin într-o lume fragmentată."],
+["În ce operă apare motivul labirintului și al vinei fără explicație?","Kafka – „Procesul”",["Blaga – „Meșterul Manole”","Kafka – „Procesul”","Rebreanu – „Ion”","Creangă – „Harap-Alb”"],"Kafka: omul prins într-un sistem absurd."],
+["Care operă ilustrează condiția creatorului și sacrificiul artistic?","„Meșterul Manole” de Lucian Blaga",["„Meșterul Manole” de Lucian Blaga","„Moara cu noroc”","„Baltagul”","„Enigma Otiliei”"],"Zidirea mănăstirii cere jertfa Anei."],
+["Cine este autorul volumului „Joc secund”?","Ion Barbu",["Tudor Arghezi","Ion Barbu","George Bacovia","Ion Pillat"],"Poezie ermetică, matematică și geometrie."],
+["Cu ce revistă/cenaclu este asociat sincronismul?","Sburătorul",["Gândirea","Sburătorul","Convorbiri literare","Viața Românească"],"Gândirea era tribuna tradiționalistă."],
+["Ce roman românesc are ca temă „Craii” decadenți ai Bucureștiului?","„Craii de Curtea-Veche”",["„Craii de Curtea-Veche”","„Ion”","„Răscoala”","„Maitreyi”"],"Mateiu Caragiale, proză a decadenței și a măștilor."]
+];
+const TP=["Ideea centrală și definiția modernismului", "Contextul istoric (Primul Război Mondial)", "Sincronismul și E. Lovinescu", "Romanul subiectiv și Camil Petrescu", "Tehnicile moderniste (fluxul conștiinței)", "Poezia ermetică / „pură”", "Motivele literaturii moderniste (oglinda, masca)", "Marcel Proust și memoria involuntară", "Operele moderniste românești", "Atitudinea omului modern: alienarea", "Kafka: labirintul și absurdul", "Blaga – „Meșterul Manole” și condiția creatorului", "Ion Barbu – „Joc secund”", "Revistele epocii: „Sburătorul” și „Gândirea”", "Mateiu Caragiale – „Craii de Curtea-Veche”"];let W=[],i=0,s=0,a=document.getElementById('app');
+function start(){a.innerHTML=`<div class="k">Test · Modernismul</div><h1>Cât de bine cunoști Modernismul?</h1><p>15 întrebări, o singură variantă corectă. La final afli rezultatul și ce mai ai de repetat.</p><p class="ex">Realizat de Ion Cocieru</p><button class="go" id="b">Începe testul</button>`;document.getElementById('b').onclick=()=>{i=0;s=0;W=[];show()}}
+function show(){const q=Q[i];a.innerHTML=`<div class="k">Întrebarea ${i+1} din ${Q.length}</div><div class="bar"><i style="width:${i/Q.length*100}%"></i></div><div class="q">${q[0]}</div><div id="o"></div><div class="ex" id="e"></div><div id="n"></div>`;
+const o=document.getElementById('o');q[2].forEach(t=>{const b=document.createElement('button');b.className='o';b.textContent=t;b.onclick=()=>pick(b,t,q);o.appendChild(b)})}
+function pick(b,t,q){const r=t===q[1];if(r)s++;else W.push(TP[i]);[...document.querySelectorAll('.o')].forEach(x=>{x.disabled=true;if(x.textContent===q[1])x.classList.add('ok')});if(!r)b.classList.add('no');
+document.getElementById('e').textContent=(r?'Corect. ':'Greșit. ')+q[3];
+const n=document.getElementById('n');n.innerHTML=`<button class="go">${i+1<Q.length?'Următoarea':'Vezi rezultatul'}</button>`;n.firstChild.onclick=()=>{i++;i<Q.length?show():end()}}
+function end(){const p=Math.round(s/Q.length*100);let m=p>=90?'🏆 ':p>=70?'👍 ':p>=50?'📚 ':'🔁 ';m+=p>=90?'Excelent! Ai înțeles foarte bine modernismul.':p>=70?'Foarte bine! Ai înțeles tema, mai ai câteva detalii de aprofundat.':p>=50?'Bine, dar mai ai lacune. Aprofundează independent subiectele de mai jos.':'Mai ai de lucru. Studiază independent subiectele de mai jos și încearcă din nou.';
+a.innerHTML=`<div class="k">Rezultat</div><p class="big">${s}/${Q.length}</p><h1>${p}%</h1><p>${m}</p>${W.length?'<div class="ex"><b>Ce mai ai de studiat independent:</b><ul>'+W.map(x=>'<li>'+x+'</li>').join('')+'</ul></div>':''}<button class="go" id="r">Reia testul</button>`;document.getElementById('r').onclick=start}
+start();
+</script></body></html>
